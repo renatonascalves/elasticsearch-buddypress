@@ -1,0 +1,117 @@
+{
+  "name": "renatonascalves/elasticsearch-buddypress",
+  "type": "wordpress-plugin",
+  "description": "BuddyPress integration with Elasticsearch.",
+  "homepage": "https://github.com/renatonascalves/elasticsearch-buddypress",
+  "license": "GPL-3.0-or-later",
+  "keywords": [
+    "buddypress",
+    "search",
+    "elasticsearch",
+    "elasticpress",
+    "searchpress"
+  ],
+  "authors": [
+    {
+      "name": "Renato Alves",
+      "homepage": "https://ralv.es"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/renatonascalves/elasticsearch-buddypress/issues",
+    "source": "https://github.com/renatonascalves/elasticsearch-buddypress"
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org",
+      "only": [
+        "wpackagist-plugin/*"
+      ]
+    },
+    {
+      "type": "package",
+      "package": {
+        "name": "buddypress/buddypress",
+        "version": "dev-master",
+        "type": "wordpress-plugin",
+        "source": {
+          "url": "https://github.com/buddypress/buddypress.git",
+          "type": "git",
+          "reference": "master"
+        }
+      }
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "spatie/elasticsearch-query-builder": "^1.0"
+  },
+  "require-dev": {
+    "alleyinteractive/alley-coding-standards": "^2.0.1",
+    "alleyinteractive/pest-plugin-wordpress": "^0.1.0",
+    "buddypress/buddypress": "dev-master",
+    "mantle-framework/testkit": "^0.12",
+    "phpstan/extension-installer": "^1.1",
+    "phpstan/phpstan": "^1.10",
+    "szepeviktor/phpstan-wordpress": "^1.1.6",
+    "wp-phpunit/wp-phpunit": "^6.3",
+    "wpackagist-plugin/elasticpress": "^4.6.1"
+  },
+  "scripts": {
+    "phpcs": "phpcs . --basepath=.",
+    "phpcbf": "phpcbf . --basepath=.",
+    "phpstan": [
+      "phpstan analyze --ansi --memory-limit=1G"
+    ],
+    "phpunit": "pest"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    },
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true,
+      "composer/installers": true,
+      "alleyinteractive/composer-wordpress-autoloader": true,
+      "pestphp/pest-plugin": true
+    }
+  },
+  "extra": {
+    "wordpress-autoloader": {
+      "autoload": {
+        "Elasticsearch\\BuddyPress\\": "src/"
+      },
+      "autoload-dev": {
+        "Elasticsearch\\BuddyPress\\Tests\\": "tests/"
+      }
+    },
+    "installer-paths": {
+      "../{$name}": [
+        "type:wordpress-plugin"
+      ],
+      "../buddypress": [
+        "buddypress/buddypress"
+      ]
+    }
+  },
+  "archive": {
+      "exclude": [
+        "*.yml",
+        "*.xml",
+        "*.dist",
+        "*.cache",
+        ".editorconfig",
+        ".gitignore",
+        ".deployignore",
+        ".github/",
+        ".phpcs/",
+        "tests/",
+        "elasticsearch-buddypress.zip",
+        "!vendor/"
+      ]
+    }
+  }

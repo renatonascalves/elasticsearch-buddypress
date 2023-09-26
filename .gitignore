@@ -1,0 +1,12 @@
+# Files and folders related to build/test tools
+/phpunit.xml
+/vendor
+.vscode
+composer.lock
+
+# Operating system specific files
+.DS_Store
+
+# Cache files
+.phpcs/*.json
+.phpunit.result.cache

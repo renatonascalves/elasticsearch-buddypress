@@ -1,0 +1,8 @@
+parameters:
+	level: 8
+	paths:
+		- elasticsearch-buddypress.php
+		- src/
+	scanDirectories:
+		- ../buddypress/
+		- ../elasticpress/
