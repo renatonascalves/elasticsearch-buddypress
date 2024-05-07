@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress\Tests
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Elasticsearch\BuddyPress\Tests;
 

@@ -5,13 +5,13 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Elasticsearch\BuddyPress;
 
+use Elasticsearch\BuddyPress\Interfaces\Hookable;
 use Elasticsearch\BuddyPress\Adapters\Adapter;
 use Elasticsearch\BuddyPress\Adapters\ElasticPress\ElasticPress;
-use Elasticsearch\BuddyPress\Interfaces\Hookable;
 
 /**
  * The controller class, which is responsible for loading adapters and
@@ -28,8 +28,6 @@ class Controller implements Hookable {
 
 	/**
 	 * A callback for the init action hook.
-	 *
-	 * @todo Confirm if this is still needed.
 	 */
 	public function action__init(): void {
 		/**
@@ -90,7 +88,7 @@ class Controller implements Hookable {
 		<div class="notice notice-error">
 			<p>
 				<strong><?php esc_html_e( 'Elasticsearch BuddyPress', 'elasticsearch-buddypress' ); ?></strong>
-				<?php esc_html_e( 'depends on the lastest version of Buddypress to work!', 'elasticsearch-buddypress' ); ?>
+				<?php esc_html_e( 'depends on the latest version of Buddypress to work!', 'elasticsearch-buddypress' ); ?>
 			</p>
 		</div>
 		<?php

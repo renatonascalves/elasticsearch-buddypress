@@ -10,7 +10,7 @@ jobs:
   composer-phpcs-phpstan:
     uses: alleyinteractive/.github/.github/workflows/php-composer-command.yml@main
     with:
-      php: 8.2
+      php: 8.3
       command: |
         phpcs
         phpstan

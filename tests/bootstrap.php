@@ -6,23 +6,22 @@
  * @package Elasticsearch\BuddyPress\Tests
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Elasticsearch\BuddyPress\Tests;
 
+use Elasticsearch\BuddyPress\Tests\TestCases\ElasticPressTestCase;
 use function Mantle\Testing\tests_add_filter;
 
 \Mantle\Testing\manager()
+	->maybe_rsync_plugin()
 	->before(
 		function () {
-			// TODO: remove it after Mantle shims factories.
-			require_once dirname( __FILE__, 2 ) . '/vendor/wp-phpunit/wp-phpunit/includes/factory.php';
-
 			// Define constants.
-			require_once dirname( __FILE__ ) . '/includes/define-constants.php';
+			require_once dirname( __FILE__ ) . '/Includes/define-constants.php';
 
 			// Define bootstrap helper functions.
-			require_once dirname( __FILE__ ) . '/includes/bootstrap-functions.php';
+			require_once dirname( __FILE__ ) . '/Includes/bootstrap-functions.php';
 
 			if ( ! file_exists( BP_TESTS_DIR . '/includes/loader.php' ) ) {
 				die( "The BuddyPress plugin could not be found.\n" );
@@ -55,10 +54,7 @@ use function Mantle\Testing\tests_add_filter;
 			// require_once BP_TESTS_DIR . '/includes/testcase.php';
 
 			// Loading testcases.
-			require_once dirname( __FILE__ ) . '/testcases/AdapterUnitTestCase.php';
-			require_once dirname( __FILE__ ) . '/testcases/ElasticPressTestCase.php';
-
-			uses( ElasticPressTestCase::class )->in( 'adapters/elasticpress' );
+			uses( ElasticPressTestCase::class )->in( 'Adapters/ElasticPress' );
 		}
 	)
 	->install();

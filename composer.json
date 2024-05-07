@@ -44,19 +44,18 @@
     }
   ],
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "spatie/elasticsearch-query-builder": "^1.0"
   },
   "require-dev": {
-    "alleyinteractive/alley-coding-standards": "^2.0.1",
-    "alleyinteractive/pest-plugin-wordpress": "^0.1.0",
+    "alleyinteractive/alley-coding-standards": "^2.0",
+    "alleyinteractive/pest-plugin-wordpress": "^0.5",
     "buddypress/buddypress": "dev-master",
-    "mantle-framework/testkit": "^0.12",
+    "mantle-framework/testkit": "^1.0",
     "phpstan/extension-installer": "^1.1",
     "phpstan/phpstan": "^1.10",
-    "szepeviktor/phpstan-wordpress": "^1.1.6",
-    "wp-phpunit/wp-phpunit": "^6.3",
-    "wpackagist-plugin/elasticpress": "^4.6.1"
+    "szepeviktor/phpstan-wordpress": "^1.3",
+    "wpackagist-plugin/elasticpress": "^4.6"
   },
   "scripts": {
     "phpcs": "phpcs . --basepath=.",
@@ -64,20 +63,27 @@
     "phpstan": [
       "phpstan analyze --ansi --memory-limit=1G"
     ],
-    "phpunit": "pest"
+    "phpunit": "pest",
+    "test_multi": "WP_MULTISITE=1 pest"
   },
   "config": {
     "platform": {
-      "php": "8.2"
+      "php": "8.3"
     },
     "optimize-autoloader": true,
     "sort-packages": true,
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
       "phpstan/extension-installer": true,
-      "composer/installers": true,
       "alleyinteractive/composer-wordpress-autoloader": true,
-      "pestphp/pest-plugin": true
+      "pestphp/pest-plugin": true,
+      "composer/installers": true
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Elasticsearch\\BuddyPress\\": "src/",
+      "Elasticsearch\\BuddyPress\\Tests\\": "tests"
     }
   },
   "extra": {

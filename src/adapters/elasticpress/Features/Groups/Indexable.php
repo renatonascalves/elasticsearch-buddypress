@@ -5,13 +5,14 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress\Features\Groups;
 
 use WP_Term;
 use WP_User;
 use WP_Taxonomy;
+use WP_Error;
 use ElasticPress\Indexable as EP_Indexable;
 
 /**
@@ -166,7 +167,7 @@ class Indexable extends EP_Indexable {
 		foreach ( $selected_taxonomies as $taxonomy ) {
 			$object_terms = bp_get_object_terms( $group_id, $taxonomy->name );
 
-			if ( ! $object_terms || is_wp_error( $object_terms ) ) {
+			if ( ! $object_terms || $object_terms instanceof WP_Error ) {
 				continue;
 			}
 
