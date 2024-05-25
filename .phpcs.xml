@@ -28,10 +28,10 @@
 	<exclude-pattern>*/**/tests/</exclude-pattern>
 
 	<!-- Configure the PHP version -->
-	<config name="testVersion" value="8.2-" />
+	<config name="testVersion" value="8.3-" />
 
 	<!-- Check against minimum WP version. -->
-	<config name="minimum_supported_wp_version" value="6.3" />
+	<config name="minimum_supported_wp_version" value="6.1" />
 
 	<!-- Set the text domain for i18n. -->
 	<rule ref="WordPress.WP.I18n">

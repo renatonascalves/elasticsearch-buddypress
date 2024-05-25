@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false # do not fail fast, let all the failing tests fail.
       matrix:
-        php: [8.2]
+        php: [8.3]
         es_version: [7.17.5]
         multisite: [0, 1]
         wp_version: ["latest"]
@@ -51,7 +51,7 @@ jobs:
           security-enabled: false
 
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
