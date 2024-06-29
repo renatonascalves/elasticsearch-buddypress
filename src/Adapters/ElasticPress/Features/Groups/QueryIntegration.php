@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress\Features\Groups;
 
@@ -15,7 +15,7 @@ use ElasticPress\Utils;
 /**
  * Groups query integration class.
  */
-class QueryIntegration {
+readonly class QueryIntegration {
 
 	/**
 	 * Setup actions and filters.
@@ -23,7 +23,6 @@ class QueryIntegration {
 	 * @param string $indexable_slug Indexable slug.
 	 */
 	public function __construct( private string $indexable_slug ) {
-		$this->indexable_slug = $indexable_slug;
 
 		/**
 		 * Filter whether to enable query integration during indexing.
@@ -37,31 +36,50 @@ class QueryIntegration {
 			return;
 		}
 
-		add_filter( 'bp_groups_get_paged_groups_sql', [ $this, 'maybe_filter_query' ], 10, 3 );
+		add_filter( 'bp_after_bp_groups_group_get_parse_args', [ $this, 'maybe_filter_bp_groups_group_get_parse_args' ] );
+
+		add_filter( 'bp_groups_get_paged_groups_sql', [ $this, 'maybe_filter_pagination_query' ], 10, 3 );
 		add_filter( 'bp_groups_get_total_groups_sql', [ $this, 'maybe_filter_total_groups_sql' ], 10, 3 );
+	}
+
+	/**
+	 * Filters the parsed arguments for the get method.
+	 *
+	 * @param array<mixed> $parsed_args Array of parsed arguments.
+	 * @return array<mixed>
+	 */
+	public function maybe_filter_bp_groups_group_get_parse_args( $parsed_args ): array {
+
+		// Check if we are on the groups component.
+		// @todo this might be too broad. We might need to check for specific group queries instead.
+		if ( bp_is_groups_component() ) {
+			$parsed_args['ep_integrate'] = true;
+		}
+
+		return $parsed_args;
 	}
 
 	/**
 	 * Filters the SQL used to retrieve group results.
 	 *
-	 * @param string       $paged_groups_sql Concatenated SQL statement.
-	 * @param array<mixed> $sql              Array of SQL parts before concatenation.
-	 * @param array<mixed> $r                Array of parsed arguments for the get method.
+	 * @param string       $groups_sql Concatenated SQL statement.
+	 * @param array<mixed> $sql        Array of SQL parts for the query.
+	 * @param array<mixed> $r          Array of parsed arguments.
 	 * @return string
 	 */
-	public function maybe_filter_query( $paged_groups_sql, $sql, $r ): string {
+	public function maybe_filter_pagination_query( $groups_sql, $sql, $r ): string {
 		$group_indexable = Indexables::factory()->get( $this->indexable_slug );
 
 		/**
 		 * Filter whether to skip group query integration.
 		 *
-		 * @param bool  $skip Whether to skip group query integration. Default false.
-		 * @param array $r    Array of parsed arguments for the get method.
+		 * @param bool         $skip Whether to skip group query integration. Defaults to `false`.
+		 * @param array<mixed> $r    Array of parsed arguments.
 		 */
 		$skip_group_query_integration = apply_filters( 'elasticsearch_buddypress_skip_group_query_integration', false, $r );
 
 		if ( ! $group_indexable->elasticpress_enabled( $r ) || true === $skip_group_query_integration ) {
-			return $paged_groups_sql;
+			return $groups_sql;
 		}
 
 		$formatted_args = $group_indexable->format_args( $r );
@@ -70,8 +88,8 @@ class QueryIntegration {
 			? $group_indexable->query_es( $formatted_args, $r )
 			: $static_results;
 
-		if ( false === $ep_query ) {
-			return $paged_groups_sql;
+		if ( empty( $ep_query ) || empty( $ep_query['found_documents']['value'] ?? 0 ) ) {
+			return $groups_sql;
 		}
 
 		$this->static_results( $formatted_args, $ep_query );
@@ -88,7 +106,7 @@ class QueryIntegration {
 			$ids = 0;
 		}
 
-		return "SELECT DISTINCT g.id FROM {$bp->groups->table_name} g WHERE g.id IN ({$ids})";
+		return sprintf( 'SELECT DISTINCT g.id FROM %s g WHERE g.id IN (%s)', $bp->groups->table_name, $ids );
 	}
 
 	/**
@@ -109,8 +127,8 @@ class QueryIntegration {
 		/**
 		 * Filter whether to skip group query integration.
 		 *
-		 * @param bool  $skip Whether to skip group query integration.
-		 * @param array $r    Array of parsed arguments.
+		 * @param bool         $skip Whether to skip group query integration. Defaults to `false`.
+		 * @param array<mixed> $r    Array of parsed arguments.
 		 */
 		$skip_group_query_integration = apply_filters( 'elasticsearch_buddypress_skip_group_query_integration', false, $r );
 
@@ -123,6 +141,10 @@ class QueryIntegration {
 		// Get from static cache if available.
 		$cached = $this->static_results( $formatted_args );
 
+		if ( empty( $cached ) ) {
+			return $total_groups_sql;
+		}
+
 		return $wpdb->prepare( 'SELECT %d', absint( $cached['found_documents']['value'] ?? 0 ) );
 	}
 
@@ -130,7 +152,7 @@ class QueryIntegration {
 	 * Get or/and set static cached results.
 	 *
 	 * @param array<mixed>      $formatted_args Formatted arguments.
-	 * @param array<mixed>|null $ep_query EP query. Default null.
+	 * @param array<mixed>|null $ep_query EP query. Defaults to `null`.
 	 * @return array<mixed>|null
 	 */
 	protected function static_results( array $formatted_args, ?array $ep_query = null ): ?array {

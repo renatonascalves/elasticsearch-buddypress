@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress\Tests
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Tests;
 
@@ -104,7 +104,7 @@ function elasticsearch_bootup(): void {
 }
 
 /**
- * Make sure we only test on 1 shard because any more will lead to inconsitent results.
+ * Make sure we only test on 1 shard because any more will lead to inconsistent results.
  *
  * @return int
  */

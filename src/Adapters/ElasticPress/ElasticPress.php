@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress;
 
@@ -66,7 +66,7 @@ class ElasticPress extends Adapter {
 		<div class="notice notice-error">
 			<p>
 				<strong><?php esc_html_e( 'Elasticsearch BuddyPress:', 'elasticsearch-buddypress' ); ?></strong>
-				<?php esc_html_e( 'the ElasticPress adapter is active but the lastest version of ElasticPress plugin is not installed or active.', 'elasticsearch-buddypress' ); ?>
+				<?php esc_html_e( 'the ElasticPress adapter is active but the latest version of ElasticPress plugin is not installed or active.', 'elasticsearch-buddypress' ); ?>
 			</p>
 		</div>
 		<?php

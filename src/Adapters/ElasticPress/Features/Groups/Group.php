@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress\Features\Groups;
 
@@ -79,11 +79,4 @@ class Group extends Feature {
 			default => $enabled,
 		};
 	}
-
-	/**
-	 * Output feature box long.
-	 *
-	 * @todo Implement this method.
-	 */
-	public function output_feature_box_long(): void {}
 }

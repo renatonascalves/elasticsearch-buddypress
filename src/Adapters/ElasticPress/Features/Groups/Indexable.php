@@ -5,14 +5,14 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress\Features\Groups;
 
+use WP_Taxonomy;
 use WP_Term;
 use WP_User;
-use WP_Taxonomy;
-use WP_Error;
+use BP_Groups_Group;
 use ElasticPress\Indexable as EP_Indexable;
 
 /**
@@ -84,7 +84,7 @@ class Indexable extends EP_Indexable {
 			$last_activity = $group->date_created;
 		}
 
-		$document = [
+		$group_document = [
 			'ID'                   => $group->id,
 			'group_id'             => $group->id,
 			'group_creator'        => $this->prepare_creator_data( $group->creator_id ),
@@ -98,8 +98,8 @@ class Indexable extends EP_Indexable {
 			'meta'                 => $this->prepare_meta_types( $this->prepare_meta( $group->id ) ),
 			'name'                 => $group->name,
 			'parent_id'            => $group->parent_id,
-			'permalink'            => bp_get_group_url( $group ),
-			'terms'                => $this->prepapre_terms( $group->id ),
+			'permalink'            => bp_get_group_url( $group ), // why say this value?
+			'terms'                => $this->prepare_terms( $group->id ),
 			'slug'                 => $group->slug,
 			'status'               => $group->status,
 			'total_member_count'   => absint( groups_get_groupmeta( $group->id, 'total_member_count', true ) ),
@@ -108,10 +108,10 @@ class Indexable extends EP_Indexable {
 		/**
 		 * Filter the group document for indexing.
 		 *
-		 * @param array<mixed> $document Group document.
-		 * @param int          $group_id Group ID.
+		 * @param array<mixed>    $group_document Group document.
+		 * @param BP_Groups_Group $group          Group object.
 		 */
-		return apply_filters( 'elasticsearch_buddypress_group_sync_args', $document, $group_id );
+		return apply_filters( 'elasticsearch_buddypress_group_sync_args', $group_document, $group );
 	}
 
 	/**
@@ -148,7 +148,7 @@ class Indexable extends EP_Indexable {
 	 * @param int $group_id Group ID.
 	 * @return array<mixed>
 	 */
-	public function prepapre_terms( int $group_id ): array {
+	public function prepare_terms( int $group_id ): array {
 		$selected_taxonomies = $this->get_indexable_group_taxonomies();
 
 		if ( empty( $selected_taxonomies ) ) {
@@ -167,19 +167,21 @@ class Indexable extends EP_Indexable {
 		foreach ( $selected_taxonomies as $taxonomy ) {
 			$object_terms = bp_get_object_terms( $group_id, $taxonomy->name );
 
-			if ( ! $object_terms || $object_terms instanceof WP_Error ) {
+			if ( ! $object_terms || ! is_array( $object_terms ) ) {
 				continue;
 			}
 
 			$formatted_terms = [];
 
 			foreach ( $object_terms as $term ) {
-				if ( ! isset( $formatted_terms[ $term->term_id ] ) ) {
-					$formatted_terms[ $term->term_id ] = $this->get_formatted_term( $term );
+				if ( isset( $formatted_terms[ $term->term_id ] ) ) {
+					continue;
+				}
 
-					if ( $allow_hierarchy ) {
-						$formatted_terms = $this->get_parent_terms( $formatted_terms, $term, $taxonomy->name, $group_id );
-					}
+				$formatted_terms[ $term->term_id ] = $this->get_formatted_term( $term );
+
+				if ( $allow_hierarchy ) {
+					$formatted_terms = $this->get_parent_terms( $formatted_terms, $term, $taxonomy->name, $group_id );
 				}
 			}
 
@@ -213,10 +215,10 @@ class Indexable extends EP_Indexable {
 		/**
 		 * Filter index-able private meta.
 		 *
-		 * Allows for specifying private meta keys that may be indexed in the same manor as public meta keys.
+		 * Allows for specifying private meta keys that may be indexed in the same manner as public meta keys.
 		 *
-		 * @param array $keys     Array of index-able private meta keys.
-		 * @param int   $group_id Group ID to be indexed.
+		 * @param string[] $keys     Array of index-able private meta keys.
+		 * @param int      $group_id Group ID to be indexed.
 		 */
 		$allowed_protected_keys = (array) apply_filters( 'elasticsearch_buddypress_prepare_group_meta_allowed_protected_keys', [], $group_id );
 
@@ -225,19 +227,22 @@ class Indexable extends EP_Indexable {
 		 *
 		 * Allows for specifying public meta keys that should be excluded from the ElasticPress index.
 		 *
-		 * @param array $keys     Array of public meta keys to exclude from index.
-		 * @param int   $group_id Group ID to be indexed.
+		 * @param string[] $keys     Array of public meta keys to exclude from index.
+		 * @param int      $group_id Group ID to be indexed.
 		 */
 		$excluded_public_keys = (array) apply_filters( 'elasticsearch_buddypress_prepare_group_meta_excluded_public_keys', $excluded_keys, $group_id );
 
 		foreach ( $meta as $key => $value ) {
-			$allow_index = false;
 
-			if ( is_protected_meta( $key ) && in_array( $key, $allowed_protected_keys, true ) ) {
-				$allow_index = true;
-			} elseif ( ! in_array( $key, $excluded_public_keys, true ) ) {
-				$allow_index = true;
-			}
+			$allow_index = match ( true ) {
+				// If the key is a protected key and is allowed, allow indexing it.
+				is_protected_meta( $key ) && in_array( $key, $allowed_protected_keys, true ) => true,
+
+				// If the key is not in the excluded public keys, allow indexing it.
+				! in_array( $key, $excluded_public_keys, true ) => true,
+
+				default => false,
+			};
 
 			/**
 			 * Filter whether to index a specific group meta key.
@@ -246,7 +251,7 @@ class Indexable extends EP_Indexable {
 			 *
 			 * @param bool   $allow_index Whether to index the meta key.
 			 * @param string $key         Meta key.
-			 * @param int    $group_id    Group ID.
+			 * @param int    $group_id    Group ID to be indexed.
 			 */
 			$allow_index = (bool) apply_filters( 'elasticsearch_buddypress_allow_index_group_meta_key', $allow_index, $key, $group_id );
 
@@ -272,7 +277,7 @@ class Indexable extends EP_Indexable {
 		$bp = buddypress();
 
 		$defaults = [
-			'number'  => 350,
+			'number'  => 100,
 			'offset'  => 0,
 			'orderby' => 'date_created',
 			'order'   => 'DESC',
@@ -334,7 +339,7 @@ class Indexable extends EP_Indexable {
 
 		$validated_taxonomies = [];
 		foreach ( $selected_taxonomies as $selected_taxonomy ) {
-			// If we get a taxonomy name, we need to convert it to taxonomy object.
+			// If we get a taxonomy name, we need to convert it into a taxonomy object.
 			if ( ! $selected_taxonomy instanceof WP_Taxonomy && taxonomy_exists( (string) $selected_taxonomy ) ) {
 				$selected_taxonomy = get_taxonomy( $selected_taxonomy );
 
@@ -389,7 +394,6 @@ class Indexable extends EP_Indexable {
 
 		if ( ! isset( $terms[ $parent_term->term_id ] ) ) {
 			$terms[ $parent_term->term_id ] = $this->get_formatted_term( $parent_term );
-
 		}
 
 		return $this->get_parent_terms( $terms, $parent_term, $taxonomy_name, $group_id );

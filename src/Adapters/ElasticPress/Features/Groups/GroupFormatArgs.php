@@ -5,7 +5,7 @@
  * @package Elasticsearch\BuddyPress
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Adapters\ElasticPress\Features\Groups;
 
@@ -21,9 +21,48 @@ use Spatie\ElasticsearchQueryBuilder\Queries\MultiMatchQuery;
 class GroupFormatArgs extends FormatArgs {
 
 	/**
+	 * Format query args.
+	 *
+	 * @return array<mixed>
+	 */
+	public function format(): array {
+
+		// Bail if no query args.
+		if ( empty( $this->query_args ) ) {
+			return [];
+		}
+
+		$es_query_args = [
+			'from'             => (int) ( $this->query_args['per_page'] * ( $this->query_args['page'] - 1 ) ),
+			'size'             => (int) $this->query_args['per_page'] ?: 20,
+			'track_total_hits' => true,
+		];
+
+		$this->parse_sort();
+		$this->maybe_set_filters();
+		$this->maybe_set_search_fields();
+		$this->maybe_set_fields();
+
+		if ( $this->query ) {
+			$es_query_args['query'] = $this->query->toArray();
+		}
+
+		if ( $this->sorts ) {
+			$es_query_args['sort'] = $this->sorts->toArray();
+		}
+
+		if ( $this->fields ) {
+			$es_query_args['_source'] = $this->fields;
+		}
+
+		return $es_query_args;
+	}
+
+	/**
 	 * Parse sort options.
 	 */
 	private function parse_sort(): void {
+		// phpcs:disable Squiz.PHP.CommentedOutCode.Found
 		// @todo support randon query.
 		/**
 		* Order by 'rand' support
@@ -140,9 +179,9 @@ class GroupFormatArgs extends FormatArgs {
 		// @todo add support.
 		if ( ! empty( $this->query_args['meta_query'] ) ) {
 			/**
-			 * Filters the meta keys to be excluded from group searches .
+			 * Filters the meta keys to be excluded from group searches.
 			 *
-			 * @param array $exclude_meta_keys Meta keys to be excluded .
+			 * @param string[] $exclude_meta_keys Meta keys to be excluded.
 			 */
 			$exclude_meta_keys = apply_filters( 'elasticsearch_buddypress_group_query_excluded_meta_keys', [] );
 
@@ -177,44 +216,7 @@ class GroupFormatArgs extends FormatArgs {
 			case 'ids':
 				$this->fields( [ 'ID' ] );
 				break;
+
 		}
-	}
-
-	/**
-	 * Format query args.
-	 *
-	 * @return array<mixed>
-	 */
-	public function format(): array {
-
-		// Bail if no query args.
-		if ( empty( $this->query_args ) ) {
-			return [];
-		}
-
-		$es_query_args = [
-			'from'             => (int) ( $this->query_args['per_page'] * ( $this->query_args['page'] - 1 ) ),
-			'size'             => (int) $this->query_args['per_page'] ?: 20,
-			'track_total_hits' => true,
-		];
-
-		$this->parse_sort();
-		$this->maybe_set_filters();
-		$this->maybe_set_search_fields();
-		$this->maybe_set_fields();
-
-		if ( $this->query ) {
-			$es_query_args['query'] = $this->query->toArray();
-		}
-
-		if ( $this->sorts ) {
-			$es_query_args['sort'] = $this->sorts->toArray();
-		}
-
-		if ( $this->fields ) {
-			$es_query_args['_source'] = $this->fields;
-		}
-
-		return $es_query_args;
 	}
 }

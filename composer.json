@@ -55,14 +55,12 @@
     "phpstan/extension-installer": "^1.1",
     "phpstan/phpstan": "^1.10",
     "szepeviktor/phpstan-wordpress": "^1.3",
-    "wpackagist-plugin/elasticpress": "^4.6"
+    "wpackagist-plugin/elasticpress": "^5.0"
   },
   "scripts": {
     "phpcs": "phpcs . --basepath=.",
     "phpcbf": "phpcbf . --basepath=.",
-    "phpstan": [
-      "phpstan analyze --ansi --memory-limit=1G"
-    ],
+    "phpstan": "phpstan analyze --ansi --memory-limit=1G",
     "phpunit": "pest",
     "test_multi": "WP_MULTISITE=1 pest"
   },
@@ -110,6 +108,7 @@
         "*.xml",
         "*.dist",
         "*.cache",
+        "CHANGELOG.md",
         ".editorconfig",
         ".gitignore",
         ".deployignore",

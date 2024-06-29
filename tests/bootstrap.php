@@ -6,7 +6,7 @@
  * @package Elasticsearch\BuddyPress\Tests
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress\Tests;
 
@@ -30,7 +30,6 @@ use function Mantle\Testing\tests_add_filter;
 	)
 	->loaded(
 		function () {
-			// @todo This is not playing nice with Mantle.
 			// Load BuddyPress.
 			require_once BP_TESTS_DIR . '/includes/loader.php';
 
@@ -48,10 +47,6 @@ use function Mantle\Testing\tests_add_filter;
 
 			// Activate all components.
 			tests_add_filter( 'bp_is_active', '__return_true' );
-
-			// @todo This is not playing nice with Mantle.
-			// echo "Loading BuddyPress testcases...\n";
-			// require_once BP_TESTS_DIR . '/includes/testcase.php';
 
 			// Loading testcases.
 			uses( ElasticPressTestCase::class )->in( 'Adapters/ElasticPress' );

@@ -19,12 +19,12 @@
  * Requires PHP:      8.3
  * Requires WP:       6.1
  * Tested up to:      6.5.2
- * Requires Plugins:  buddypress
+ * Requires Plugins:  buddypress, elasticpress
  * License:           GPL-3.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-declare( strict_types=1 );
+declare(strict_types=1);
 
 namespace Elasticsearch\BuddyPress;
 

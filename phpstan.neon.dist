@@ -3,6 +3,7 @@ parameters:
 	paths:
 		- elasticsearch-buddypress.php
 		- src/
+		- tests/
 	scanDirectories:
 		- ../buddypress/
 		- ../elasticpress/
